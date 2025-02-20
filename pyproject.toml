@@ -1,0 +1,15 @@
+[project]
+name = "stepaudiotts_mw"
+description = "A Text To Speech node using Step-Audio-TTS in ComfyUI. Can speak, rap, sing, or clone voice."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["transformers==4.48.3", "openai-whisper==20231117", "sox==1.5.0", "hyperpyyaml", "conformer==0.3.2", "funasr>=1.1.3"]
+
+[project.urls]
+Repository = "https://github.com/billwuhao/ComfyUI_StepAudioTTS"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = "mw"
+DisplayName = "ComfyUI_StepAudioTTS"
+Icon = "https://github.com/billwuhao/aiart.website/blob/master/hb.png"
