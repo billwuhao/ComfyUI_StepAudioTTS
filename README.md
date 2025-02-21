@@ -20,20 +20,19 @@
 | Step-Audio-Tokenizer | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-Tokenizer) |
 | Step-Audio-TTS-3B | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-TTS-3B) |
 
-### 声音下载
-
-https://github.com/stepfun-ai/Step-Audio/tree/main/speakers 
-
-整个文件夹下载到 `ComfyUI\models\TTS` 文件夹中. 并重命名为 `Step-Audio-speakers`.
-
 应包含以下结构：
-
 ```
 ComfyUI\models\TTS
 ├── Step-Audio-Tokenizer
-├── Step-Audio-speakers
 ├── Step-Audio-TTS-3B
 ```
+
+### 欢迎贡献更多声音
+
+音频文件命名为 `{说话者}_prompt.WAV`, 例如 `明文_prompt.WAV` 我将添加它们到代码中. 从而无需克隆.
+
+当前支持的声音在 `Step-Audio-speakers` 文件夹中, 欢迎提交更多声音.
+
 
 ## 支持 中文, 英文, 韩语, 日语, 四川话, 粤语等
 

@@ -10,7 +10,7 @@ import onnxruntime
 import whisper
 
 from sa_utils import resample_audio, energy_norm_fn, trim_silence
-
+from funasr_detach import AutoModel 
 
 class StepAudioTokenizer:
     from funasr_detach import AutoModel
@@ -48,7 +48,6 @@ class StepAudioTokenizer:
     @property
     def funasr_model(self):
         if self._funasr_model is None:
-            from funasr_detach import AutoModel  # 在这里进行延迟导入
             self._funasr_model = AutoModel(model=self.funasr_model_path, model_revision="master") # 初始化模型
         return self._funasr_model
 

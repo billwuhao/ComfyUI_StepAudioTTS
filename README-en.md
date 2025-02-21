@@ -22,20 +22,19 @@ Download to the `ComfyUI\models\TTS` folder
 | Step-Audio-Tokenizer | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-Tokenizer) |
 | Step-Audio-TTS-3B | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-TTS-3B) |
 
-### Voices Download
-
-https://github.com/stepfun-ai/Step-Audio/tree/main/speakers 
-
-Download the entire folder to the `ComfyUI\models\TTS` folder. And rename it as `Step-Audio-speakers`.
-
 Where_you_download_dir should have the following structure:
-
 ```
 ComfyUI\models\TTS
 ├── Step-Audio-Tokenizer
-├── Step-Audio-Chat
 ├── Step-Audio-TTS-3B
 ```
+
+### Welcome to contribute more voices
+
+The audio file is named as `{Speaker}_prompt_.WAV`, For example, `明文_prompt.WAV`. I will add them to the code. Thus, there is no need for cloning.
+
+The currently supported voices are in the `Step-Audio-speakers` folder. Welcome to PR more voices.
+
 
 ## Supports Chinese, English, Korean, Japanese, Sichuanese, Cantonese etc.
 
