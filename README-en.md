@@ -4,7 +4,21 @@
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-21_05-34-25.png)
 
-assets/2025-02-21_05-34-25.png
+## Update
+
+[2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. But please note that the three places in the figure must maintain consistent speaker name. When customizing, the `speaker` will automatically become invalid.
+
+![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-25_20-21-22.png)
+
+In order not to affect the update, i have to move the `Step-Audio-speakers` folder to the `ComfyUI\models\TTS` folder. Please move it yourself. The structure is as follows:
+
+```
+ComfyUI\models\TTS
+├── Step-Audio-Tokenizer
+├── Step-Audio-speakers
+├── Step-Audio-TTS-3B
+```
+
 
 ## Model Download
 

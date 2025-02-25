@@ -111,12 +111,12 @@ class StepAudioTTS:
             # print(clone_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
 
         else:
-            with open(f"{node_dir}/Step-Audio-speakers/speakers_info.json", "r") as f:
+            with open(f"{speaker_path}/speakers_info.json", "r") as f:
                 speakers_info = json.load(f)
 
             for speaker_id, prompt_text in speakers_info.items():
                 if speaker_id == prompt_speaker:
-                    prompt_wav_path = f"{node_dir}/Step-Audio-speakers/{speaker_id}_prompt.wav"
+                    prompt_wav_path = f"{speaker_path}/{speaker_id}_prompt.wav"
                     waveform, sample_rate = torchaudio.load(prompt_wav_path)
                     audio = {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}
                     prompt_code, prompt_token, prompt_token_len, speech_feat, speech_feat_len, speech_embedding = (
@@ -284,9 +284,10 @@ class StepAudioRun:
         return {
             "required": {
                 "text": ("STRING", {"default": "", "multiline": True}),
-                "speaker": (speaker_options, {"default": "Tingting"}),
+                "speaker": (speaker_options, {"default": "婷婷"}),
             },
             "optional": {
+                "custom_speaker": ("STRING", {"default": "", "multiline": False}),
                 "emotion": (emotion_options, {"default": "None"}),
                 "language": (language_options, {"default": "None"}),
                 "express": (express_options, {"default": "None"}),
@@ -299,7 +300,9 @@ class StepAudioRun:
     FUNCTION = "speak"
     CATEGORY = "MW-Step-Audio"
 
-    def speak(self, text, speaker, emotion, language, express, speed):
+    def speak(self, text, speaker, custom_speaker, emotion, language, express, speed):
+        if not custom_speaker.strip():
+            speaker = custom_speaker
         conditions = gen_text(emotion, language, express, speed)
         # print(conditions, end="\n\n")
         texts = [i.strip() for i in text.split("\n+") if  i.strip()]

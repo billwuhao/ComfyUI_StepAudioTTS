@@ -4,6 +4,21 @@
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-21_05-34-25.png)
 
+## 更新
+
+[2025-02-25]⚒️: 支持自定义说话者 `custom_speaker`. 但注意下图三个地方必须保持一致的说话者名称. 自定义时 `speaker` 将自动无效.
+
+![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-25_20-21-22.png)
+
+为了不影响更新, 不得不将 `Step-Audio-speakers` 文件夹移动到 `ComfyUI\models\TTS` 文件夹中, 请自行移动. 结构如下:
+
+```
+ComfyUI\models\TTS
+├── Step-Audio-Tokenizer
+├── Step-Audio-speakers
+├── Step-Audio-TTS-3B
+```
+
 ## 模型下载
 
 下载到 `ComfyUI\models\TTS` 文件夹中.
