@@ -6,6 +6,8 @@
 
 ## Update
 
+[2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
+
 [2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. But please note that the three places in the figure must maintain consistent speaker name. When customizing, the `speaker` will automatically become invalid.
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-25_20-21-22.png)

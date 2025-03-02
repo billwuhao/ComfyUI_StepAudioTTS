@@ -1,8 +1,6 @@
 import torchaudio
-import folder_paths
 import os
-import hashlib
-import re
+import copy
 import json
 import torch
 import numpy as np
@@ -53,12 +51,6 @@ class StepAudioTTS:
         self._music_cosy_model = None
 
         self.encoder = encoder
-        self.sys_prompt_dict = {
-            "sys_prompt_for_rap": "作为一名优秀的RAP歌手, 卓越的声优演员，请用同样的音色，用RAP方式将文本内容大声说唱出来。",
-            "sys_prompt_for_vocal": "作为一名优秀的歌唱家, 歌星, 卓越的声优演员，请用同样的音色，用哼唱的方式将文本内容大声唱出来。",
-            "sys_prompt_for_spk": '作为一名卓越的声优演员或歌手，你的任务是根据文本中（）或()括号内标注的情感、语种或方言、音乐哼唱、语音调整等标签，以丰富细腻的情感和自然顺畅的语调，用同样的音色，来朗读或哼唱文本。\n# 情感标签涵盖了多种情绪状态，包括但不限于：\n- "高兴1"\n- "高兴2"\n- "生气1"\n- "生气2"\n- "悲伤1"\n- "撒娇1"\n\n# 语种或方言标签包含多种语言或方言，包括但不限于：\n- "中文"\n- "英文"\n- "韩语"\n- "日语"\n- "四川话"\n- "粤语"\n- "广东话"\n\n# 音乐哼唱标签包含多种类型歌曲哼唱，包括但不限于：\n- "RAP"\n- "哼唱"\n\n# 语音调整标签，包括但不限于：\n- "慢速1"\n- "慢速2"\n- "快速1"\n- "快速2"\n\n请在朗读或哼唱时，使用[{}]的声音，根据这些情感标签的指示，调整你的情感、语气、语调和哼唱节奏，以确保文本的情感和意义得到准确而生动的传达，如果没有()或（）括号，则根据文本语义内容恰到好处地演绎。',
-        }
-
 
     @property
     def llm(self):
@@ -92,64 +84,94 @@ class StepAudioTTS:
             self._music_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz-Music"))
         return self._music_cosy_model
 
-    def __call__(self, text: str, prompt_speaker: str, clone_dict: dict | None = None):
-        if clone_dict:
-            clone_prompt_code, clone_prompt_token, clone_prompt_token_len, clone_speech_feat, clone_speech_feat_len, clone_speech_embedding = (
-                self.preprocess_prompt_wav(clone_dict['audio'])
-            )
-            prompt_speaker_info =  {
-                "prompt_text": clone_dict['prompt_text'],
-                "prompt_code": clone_prompt_code,
-                "cosy_speech_feat": clone_speech_feat.to(torch.bfloat16),
-                "cosy_speech_feat_len": clone_speech_feat_len,
-                "cosy_speech_embedding": clone_speech_embedding.to(torch.bfloat16),
-                "cosy_prompt_token": clone_prompt_token,
-                "cosy_prompt_token_len": clone_prompt_token_len,
-            }
-            
-            clone_speaker = clone_dict['speaker']
-            # print(clone_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
-
-        else:
-            with open(f"{speaker_path}/speakers_info.json", "r") as f:
-                speakers_info = json.load(f)
-
-            for speaker_id, prompt_text in speakers_info.items():
-                if speaker_id == prompt_speaker:
-                    prompt_wav_path = f"{speaker_path}/{speaker_id}_prompt.wav"
-                    waveform, sample_rate = torchaudio.load(prompt_wav_path)
-                    audio = {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}
-                    prompt_code, prompt_token, prompt_token_len, speech_feat, speech_feat_len, speech_embedding = (
-                        self.preprocess_prompt_wav(audio)
-                    )
-                    prompt_speaker_info = {
-                        "prompt_text": prompt_text,
-                        "prompt_code": prompt_code,
-                        "cosy_speech_feat": speech_feat.to(torch.bfloat16),
-                        "cosy_speech_feat_len": speech_feat_len,
-                        "cosy_speech_embedding": speech_embedding.to(torch.bfloat16),
-                        "cosy_prompt_token": prompt_token,
-                        "cosy_prompt_token_len": prompt_token_len,
-                    }
-                    # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
-                    break
-
-                elif prompt_speaker not in speakers_info.keys():
-                    raise ValueError("There is no such speaker") 
-
-        instruction_name = self.detect_instruction_name(text)
+    def __call__(self, text: str, cosy_model, prompt_speaker_info, history):
+        # instruction_name = self.detect_instruction_name(text)
         
-        if "RAP" or "哼唱" in instruction_name:
-            cosy_model = self.music_cosy_model
-        else:
-            cosy_model = self.common_cosy_model
+        # if "RAP" in instruction_name or "哼唱" in instruction_name:
+        #     cosy_model = self.music_cosy_model
+        # else:
+        #     cosy_model = self.common_cosy_model
+
+        # prompt_speaker_info =  {}
+        # if clone_dict:
+        #     clone_prompt_code, clone_prompt_token, clone_prompt_token_len, clone_speech_feat, clone_speech_feat_len, clone_speech_embedding = (
+        #         self.preprocess_prompt_wav(clone_dict['audio'], cosy_model)
+        #     )
+        #     prompt_speaker_info =  {
+        #         "prompt_text": clone_dict['prompt_text'],
+        #         "prompt_code": clone_prompt_code,
+        #         "cosy_speech_feat": clone_speech_feat.to(torch.bfloat16),
+        #         "cosy_speech_feat_len": clone_speech_feat_len,
+        #         "cosy_speech_embedding": clone_speech_embedding.to(torch.bfloat16),
+        #         "cosy_prompt_token": clone_prompt_token,
+        #         "cosy_prompt_token_len": clone_prompt_token_len,
+        #     }
+            
+        #     prompt_speaker = clone_dict['speaker']
+        #     # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
+
+        # else:
+        #     with open(f"{speaker_path}/speakers_info.json", "r") as f:
+        #         speakers_info = json.load(f)
+
+        #     for speaker_id, prompt_text in speakers_info.items():
+        #         if speaker_id == prompt_speaker:
+        #             prompt_wav_path = f"{speaker_path}/{speaker_id}_prompt.wav"
+        #             waveform, sample_rate = torchaudio.load(prompt_wav_path)
+        #             audio = {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}
+        #             prompt_code, prompt_token, prompt_token_len, speech_feat, speech_feat_len, speech_embedding = (
+        #                 self.preprocess_prompt_wav(audio, cosy_model)
+        #             )
+        #             prompt_speaker_info = {
+        #                 "prompt_text": prompt_text,
+        #                 "prompt_code": prompt_code,
+        #                 "cosy_speech_feat": speech_feat.to(torch.bfloat16),
+        #                 "cosy_speech_feat_len": speech_feat_len,
+        #                 "cosy_speech_embedding": speech_embedding.to(torch.bfloat16),
+        #                 "cosy_prompt_token": prompt_token,
+        #                 "cosy_prompt_token_len": prompt_token_len,
+        #             }
+        #             # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
+        #             break
+
+        #         elif prompt_speaker not in speakers_info.keys():
+        #             raise ValueError("There is no such speaker") 
+
         # print("指定文本: ", text, "的说话者是: ", prompt_speaker, end="\n\n")
-        token_ids = self.tokenize(
-            text,
-            prompt_speaker_info["prompt_text"],
-            prompt_speaker,
-            prompt_speaker_info["prompt_code"],
+        
+        # cosy_model, prompt_speaker_info, history = self.data_preprocess()
+
+        _prefix_tokens = self.autotokenizer.encode("\n")
+        target_token_encode = self.autotokenizer.encode("\n" + text)
+        target_tokens = target_token_encode[len(_prefix_tokens) :]
+
+        # qrole_toks = self.autotokenizer.encode("human\n")
+        arole_toks = self.autotokenizer.encode("assistant\n")
+
+        history.extend(
+            # [4]
+            # + qrole_toks
+            # + prompt_tokens
+            # + [3]
+            # + [4]
+            # + arole_toks
+            # + prompt_code
+            # + [3]
+            # + [4]
+            # + qrole_toks
+            target_tokens
+            + [3]
+            + [4]
+            + arole_toks
         )
+
+        # token_ids = self.tokenize_history(
+        #     text,
+        #     prompt_speaker_info["prompt_text"],
+        #     prompt_speaker,
+        #     prompt_speaker_info["prompt_code"],
+        # )
+        token_ids = history
         output_ids = self.llm.generate(
             torch.tensor([token_ids]).to(torch.long).to("cuda"),
             max_length=8192,
@@ -170,27 +192,101 @@ class StepAudioTTS:
             22050,
         )
 
-    def detect_instruction_name(self, text):
-        instruction_names = []
-        pattern = r"\(.*?\)|（.*?）"
-        matches = re.findall(pattern, text) 
-        if matches:
-            instruction_names = [i.strip("() （）") for i in matches if i.strip("() （）")]
-        return instruction_names
+    def data_preprocess(self, marks, prompt_speaker: str, clone_dict: dict | None = None):
+        # instruction_name = self.detect_instruction_name(text)
+        
+        if "(RAP)" in marks or "(哼唱)" in marks:
+            cosy_model = self.music_cosy_model
+        else:
+            cosy_model = self.common_cosy_model
 
-    def tokenize(
-        self, text: str, prompt_text: str, prompt_speaker: str, prompt_code: list
+        prompt_speaker_info =  {}
+        if clone_dict:
+            clone_prompt_code, clone_prompt_token, clone_prompt_token_len, clone_speech_feat, clone_speech_feat_len, clone_speech_embedding = (
+                self.preprocess_prompt_wav(clone_dict['audio'], cosy_model)
+            )
+            prompt_speaker_info =  {
+                "prompt_text": clone_dict['prompt_text'],
+                "prompt_code": clone_prompt_code,
+                "cosy_speech_feat": clone_speech_feat.to(torch.bfloat16),
+                "cosy_speech_feat_len": clone_speech_feat_len,
+                "cosy_speech_embedding": clone_speech_embedding.to(torch.bfloat16),
+                "cosy_prompt_token": clone_prompt_token,
+                "cosy_prompt_token_len": clone_prompt_token_len,
+            }
+            
+            prompt_speaker = clone_dict['speaker']
+            # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
+
+        else:
+            with open(f"{speaker_path}/speakers_info.json", "r") as f:
+                speakers_info = json.load(f)
+
+            for speaker_id, prompt_text in speakers_info.items():
+                if speaker_id == prompt_speaker:
+                    prompt_wav_path = f"{speaker_path}/{speaker_id}_prompt.wav"
+                    waveform, sample_rate = torchaudio.load(prompt_wav_path)
+                    audio = {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}
+                    prompt_code, prompt_token, prompt_token_len, speech_feat, speech_feat_len, speech_embedding = (
+                        self.preprocess_prompt_wav(audio, cosy_model)
+                    )
+                    prompt_speaker_info = {
+                        "prompt_text": prompt_text,
+                        "prompt_code": prompt_code,
+                        "cosy_speech_feat": speech_feat.to(torch.bfloat16),
+                        "cosy_speech_feat_len": speech_feat_len,
+                        "cosy_speech_embedding": speech_embedding.to(torch.bfloat16),
+                        "cosy_prompt_token": prompt_token,
+                        "cosy_prompt_token_len": prompt_token_len,
+                    }
+                    # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
+                    break
+
+                elif prompt_speaker not in speakers_info.keys():
+                    raise ValueError("There is no such speaker") 
+                
+        
+        history = self.tokenize_history(
+            marks,
+            prompt_speaker_info["prompt_text"],
+            prompt_speaker,
+            prompt_speaker_info["prompt_code"],
+        )
+
+        return cosy_model, prompt_speaker_info, history
+
+    # def detect_instruction_name(self, text):
+    #     instruction_names = []
+    #     pattern = r"\(.*?\)|（.*?）"
+    #     matches = re.findall(pattern, text) 
+    #     if matches:
+    #         instruction_names = [i.strip("() （）") for i in matches if i.strip("() （）")]
+    #     return instruction_names
+
+    def tokenize_history(
+        self, 
+        marks: list, 
+        prompt_text: str, 
+        prompt_speaker: str, 
+        prompt_code: list
     ):
-        rap_or_vocal = self.detect_instruction_name(text)
+        
+        sys_prompt_dict = {
+            "sys_prompt_for_rap": "请用 RAP 方式将文本内容大声说唱出来。[] 括号内标注了说唱者的名字, 请使用 [{}] 的声音, 大声说唱出其后面的文本内容: ",
+            "sys_prompt_for_vocal": "请用哼唱的方式将文本内容大声唱出来。[] 括号内标注了唱歌者的名字, 请使用 [{}] 的声音, 大声唱出其后面的文本内容: ",
+            "sys_prompt_for_spk": '作为一名卓越的声优演员，你的任务是根据文本中 （） 或 () 括号内标注的情感、语种或方言、音乐哼唱、语音调整等标签，以丰富细腻的情感和自然顺畅的语调，来朗读文本。\n# 情感标签涵盖了多种情绪状态，包括但不限于：\n- "高兴1"\n- "高兴2"\n- "生气1"\n- "生气2"\n- "悲伤1"\n- "撒娇1"\n\n# 语种或方言标签包含多种语言或方言，包括但不限于：\n- "中文"\n- "英文"\n- "韩语"\n- "日语"\n- "四川话"\n- "粤语"\n\n# 音乐哼唱标签包含多种类型歌曲哼唱，包括但不限于：\n- "RAP"\n- "哼唱"\n\n# 语音调整标签，包括但不限于：\n- "慢速1"\n- "慢速2"\n- "快速1"\n- "快速2"\n\n请在朗读时，根据这些情感标签的指示，调整你的情感、语气、语调和哼唱节奏，以确保文本的情感和意义得到准确而生动的传达，如果没有 () 或 （） 括号，则根据文本语义内容恰到好处地演绎。[] 括号内标注了朗读者的名字, 请使用 [{}] 的声音, 大声朗读出其后面的文本内容: ',
+        }
 
-        if len(rap_or_vocal) == 1 and rap_or_vocal[0] == "哼唱":
-            prompt = self.sys_prompt_dict["sys_prompt_for_vocal"]
+        # rap_or_vocal = self.detect_instruction_name(text)
+
+        if marks[0] == "(哼唱)":
+            prompt = sys_prompt_dict["sys_prompt_for_vocal"].format(prompt_speaker)
             # print("哼唱系统消息: ", prompt, end="\n\n")
-        elif len(rap_or_vocal) == 1 and rap_or_vocal[0] == "RAP":
-            prompt = self.sys_prompt_dict["sys_prompt_for_rap"]
+        elif marks[0] == "(RAP)":
+            prompt = sys_prompt_dict["sys_prompt_for_rap"].format(prompt_speaker)
             # print("RAP系统消息: ", prompt, end="\n\n")
         else:
-            prompt = self.sys_prompt_dict["sys_prompt_for_spk"].format(prompt_speaker)
+            prompt = sys_prompt_dict["sys_prompt_for_spk"].format(prompt_speaker)
             # print("其他系统消息: ", prompt, end="\n\n")
         
         sys_tokens = self.autotokenizer.encode(f"system\n{prompt}")
@@ -202,8 +298,8 @@ class StepAudioTTS:
         prompt_token_encode = self.autotokenizer.encode("\n" + prompt_text)
         prompt_tokens = prompt_token_encode[len(_prefix_tokens) :]
 
-        target_token_encode = self.autotokenizer.encode("\n" + text)
-        target_tokens = target_token_encode[len(_prefix_tokens) :]
+        # target_token_encode = self.autotokenizer.encode("\n" + text)
+        # target_tokens = target_token_encode[len(_prefix_tokens) :]
 
         qrole_toks = self.autotokenizer.encode("human\n")
         arole_toks = self.autotokenizer.encode("assistant\n")
@@ -219,14 +315,14 @@ class StepAudioTTS:
             + [3]
             + [4]
             + qrole_toks
-            + target_tokens
-            + [3]
-            + [4]
-            + arole_toks
+            # + target_tokens
+            # + [3]
+            # + [4]
+            # + arole_toks
         )
         return history
 
-    def preprocess_prompt_wav(self, audio : str):
+    def preprocess_prompt_wav(self, audio, cosy_model):
         prompt_wav = audio["waveform"].squeeze(0)
         prompt_wav_sr = audio["sample_rate"]
 
@@ -240,9 +336,9 @@ class StepAudioTTS:
         )(prompt_wav)
 
         speech_feat, speech_feat_len = (
-            self.common_cosy_model.frontend._extract_speech_feat(prompt_wav_22k)
+            cosy_model.frontend._extract_speech_feat(prompt_wav_22k)
         )
-        speech_embedding = self.common_cosy_model.frontend._extract_spk_embedding(
+        speech_embedding = cosy_model.frontend._extract_spk_embedding(
             prompt_wav_16k
         )
 
@@ -292,6 +388,7 @@ class StepAudioRun:
                 "language": (language_options, {"default": "None"}),
                 "express": (express_options, {"default": "None"}),
                 "speed": (speed_options, {"default": "None"}),
+                "custom_mark": ("STRING", {"default": "(温柔)", "multiline": False}),
             }
         }
 
@@ -300,17 +397,23 @@ class StepAudioRun:
     FUNCTION = "speak"
     CATEGORY = "MW-Step-Audio"
 
-    def speak(self, text, speaker, custom_speaker, emotion, language, express, speed):
+    def speak(self, text, speaker, custom_speaker, emotion, language, express, speed, custom_mark):
         if custom_speaker.strip():
             speaker = custom_speaker
-        conditions = gen_text(emotion, language, express, speed)
+        if express == "哼唱":
+            conditions = ["(哼唱)"]
+        elif express == "RAP":
+            conditions = ["(RAP)"]
+        else:
+            conditions = gen_text(emotion, language, speed, custom_mark)
         # print(conditions, end="\n\n")
-        texts = [i.strip() for i in text.split("\n+") if  i.strip()]
+        cosy_model, prompt_speaker_info, history = tts_engine.data_preprocess(conditions, speaker)
+        texts = [i.strip() for i in text.split("\n\n") if  i.strip()]
         audio_data = []
         for i in texts:
-            text = "".join(conditions) + " "  + i
+            text = "".join(conditions) + f"[{speaker}]: {i}"
             # print(text, end="\n\n")
-            output_audio, sr = tts_engine(text, speaker)
+            output_audio, sr = tts_engine(text, cosy_model, prompt_speaker_info, copy.deepcopy(history))
             audio_data.append(output_audio)
 
         audio_tensor = torch.cat(audio_data, dim=1).unsqueeze(0).float()
@@ -323,7 +426,7 @@ class StepAudioClone:
         return {
             "required": {
                 "text": ("STRING", {"default": "", "multiline": True}),
-                "speaker_name": ("STRING", {"default": "Myvoice", "multiline": False}),
+                "speaker_name": ("STRING", {"default": "", "multiline": False}),
                 "clone_text": ("STRING", {"default": "", "multiline": True, "tooltip": "The clone audio's text."}),
                 "clone_audio": ("AUDIO", ),
             },
@@ -332,6 +435,7 @@ class StepAudioClone:
                 "language": (language_options, {"default": "None"}),
                 "express": (express_options, {"default": "None"}),
                 "speed": (speed_options, {"default": "None"}),
+                "custom_mark": ("STRING", {"default": "(温柔)", "multiline": False}),
             }
         }
 
@@ -340,26 +444,31 @@ class StepAudioClone:
     FUNCTION = "clone"
     CATEGORY = "MW-Step-Audio"
 
-    def clone(self, text, clone_audio, clone_text, speaker_name, emotion, language, express, speed):
-        conditions = gen_text(emotion, language, express, speed)
+    def clone(self, text, clone_audio, clone_text, speaker_name, emotion, language, express, speed, custom_mark):
+        if express == "哼唱":
+            conditions = ["(哼唱)"]
+        elif express == "RAP":
+            conditions = ["(RAP)"]
+        else:
+            conditions = gen_text(emotion, language, speed, custom_mark)
         # print(conditions, end="\n\n")
         if not speaker_name.strip():
-            speaker_name = "同样"
-
-        clone_text = "".join(conditions) + " "  + clone_text
+            speaker_name = "wuming"
+        clone_text = "".join(conditions) + f"[{speaker_name}]: {clone_text}"
         # print(clone_text, end="\n\n")
-        clone_speaker = {
+        clone_speaker_info = {
             "audio": clone_audio,
             "speaker": speaker_name,
             "prompt_text": clone_text
         }
+        cosy_model, prompt_speaker_info, history = tts_engine.data_preprocess(conditions, speaker_name, clone_speaker_info)
 
-        texts = [i.strip() for i in text.split("\n+") if  i.strip()]
+        texts = [i.strip() for i in text.split("\n\n") if  i.strip()]
         audio_data = []
         for i in texts:
-            text = "".join(conditions) + " "  + i
+            text = "".join(conditions) + f"[{speaker_name}]: {i}"
             # print(text, end="\n\n")
-            output_audio, sr = tts_engine(text, speaker_name, clone_speaker)
+            output_audio, sr = tts_engine(text, cosy_model, prompt_speaker_info, copy.deepcopy(history))
             audio_data.append(output_audio)
 
         audio_tensor = torch.cat(audio_data, dim=1).unsqueeze(0).float()

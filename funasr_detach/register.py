@@ -21,34 +21,34 @@ class RegisterTables:
     index_ds_classes = {}
 
     def print(self, key=None):
-        print("\ntables: \n")
-        fields = vars(self)
-        for classes_key, classes_dict in fields.items():
+        # print("\ntables: \n")
+        # fields = vars(self)
+        # for classes_key, classes_dict in fields.items():
 
-            flag = True
-            if key is not None:
-                flag = key in classes_key
-            if classes_key.endswith("_meta") and flag:
-                print(
-                    f"-----------    ** {classes_key.replace('_meta', '')} **    --------------"
-                )
-                headers = ["class name", "class location"]
-                metas = []
-                for register_key, meta in classes_dict.items():
-                    metas.append(meta)
-                metas.sort(key=lambda x: x[0])
-                data = [headers] + metas
-                col_widths = [max(len(str(item)) for item in col) for col in zip(*data)]
+        #     flag = True
+        #     if key is not None:
+        #         flag = key in classes_key
+        #     if classes_key.endswith("_meta") and flag:
+        #         print(
+        #             f"-----------    ** {classes_key.replace('_meta', '')} **    --------------"
+        #         )
+        #         headers = ["class name", "class location"]
+        #         metas = []
+        #         for register_key, meta in classes_dict.items():
+        #             metas.append(meta)
+        #         metas.sort(key=lambda x: x[0])
+        #         data = [headers] + metas
+        #         col_widths = [max(len(str(item)) for item in col) for col in zip(*data)]
 
-                for row in data:
-                    print(
-                        "| "
-                        + " | ".join(
-                            str(item).ljust(width)
-                            for item, width in zip(row, col_widths)
-                        )
-                        + " |"
-                    )
+        #         for row in data:
+        #             print(
+        #                 "| "
+        #                 + " | ".join(
+        #                     str(item).ljust(width)
+        #                     for item, width in zip(row, col_widths)
+        #                 )
+        #                 + " |"
+        #             )
         print("\n")
 
     def register(self, register_tables_key: str, key=None):
