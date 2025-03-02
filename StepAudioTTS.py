@@ -301,7 +301,7 @@ class StepAudioRun:
     CATEGORY = "MW-Step-Audio"
 
     def speak(self, text, speaker, custom_speaker, emotion, language, express, speed):
-        if not custom_speaker.strip():
+        if custom_speaker.strip():
             speaker = custom_speaker
         conditions = gen_text(emotion, language, express, speed)
         # print(conditions, end="\n\n")
