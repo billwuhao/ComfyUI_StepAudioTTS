@@ -219,8 +219,16 @@ class StepAudioTTS:
             # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
 
         else:
-            with open(f"{speaker_path}/speakers_info.json", "r") as f:
-                speakers_info = json.load(f)
+            encodings = ["utf-8", "gbk", "utf-8-sig"]  # utf-8-sig 处理带 BOM 的 UTF-8
+            for encoding in encodings:
+                try:
+                    with open(f"{speaker_path}/speakers_info.json", "r", encoding=encoding) as f:
+                        speakers_info = json.load(f)
+                    break
+                except UnicodeDecodeError:
+                    continue
+            else:
+                raise UnicodeDecodeError(f"Failed to decode {speaker_path}/speakers_info.json with encodings {encodings}")
 
             for speaker_id, prompt_text in speakers_info.items():
                 if speaker_id == prompt_speaker:
