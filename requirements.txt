@@ -19,3 +19,6 @@ sox
 hyperpyyaml
 conformer
 funasr>=1.1.3
+sounddevice
+noisereduce
+scipy
