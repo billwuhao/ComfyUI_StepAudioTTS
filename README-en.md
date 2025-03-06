@@ -10,6 +10,15 @@
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
 
+| 参数名/Parameter     | 作用描述/Description                                                                 | 范围/Range                     | 注意事項/Notes                                                                 |
+|---------------------|------------------------------------------------------------------------------------|--------------------------------|------------------------------------------------------------------------------|
+| **trigger**         | 录音触发开关 - 设为True开始录音<br>Recording trigger - Set to True to start recording | Boolean (True/False)           | 需要从False切到True才能触发<br>Requires changing from False to True to activate          |
+| **record_sec**      | 主录音时长（秒）<br>Main recording duration (seconds)                               | 1-60 (整数/integer)             | 实际时长<br>Actual duration            |
+| **n_fft**           | FFT窗口大小（影响频率分辨率）<br>FFT window size (affects frequency resolution)      | 512,1024,...,4096 (512倍数/multiplies) | 值越大频率分辨率越高<br>Higher values give better frequency resolution                   |
+| **sensitivity**     | 降噪灵敏度（值越高越激进）<br>Noise reduction sensitivity (higher=more aggressive)   | 0.5-3.0 (步长0.1/step 0.1)      | 1.2=标准办公室环境<br>1.2=standard office environment                                   |
+| **smooth**          | 时频平滑系数（值越高越自然）<br>Time-frequency smoothing (higher=more natural)       | 1,3,5,7,9,11 (奇数/odd numbers) | 建议语音：5，音乐：7<br>Recommended: 5 for speech, 7 for music                          |
+| **sample_rate**     | 采样率（影响音质与文件大小）<br>Sampling rate (affects quality & size)               | 16000/44100/48000 Hz           | 44100=CD音质<br>44100=CD quality                                                         |
+
 [2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
 
 [2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. But please note that the three places in the figure must maintain consistent speaker name. When customizing, the `speaker` will automatically become invalid.
