@@ -6,6 +6,8 @@
 
 ## Update
 
+[2025-03-07]⚒️: Custom speakers can be defined directly in `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` without the need for input in the node.
+
 [2025-03-06]⚒️: New recording node `MW Audio Recorder` can be used to record audio with a microphone, and the progress bar displays the recording progress:
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
@@ -21,11 +23,9 @@
 
 [2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
 
-[2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. But please note that the three places in the figure must maintain consistent speaker name. When customizing, the `speaker` will automatically become invalid.
+[2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. 
 
-![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-25_20-21-22.png)
-
-In order not to affect the update, i have to move the `Step-Audio-speakers` folder to the `ComfyUI\models\TTS` folder. Please move it yourself. The structure is as follows:
+Move the `Step-Audio-speakers` folder from this repository to the `ComfyUI\models\TTS` folder. The structure is as follows:
 
 ```
 ComfyUI\models\TTS
@@ -33,6 +33,10 @@ ComfyUI\models\TTS
 ├── Step-Audio-speakers
 ├── Step-Audio-TTS-3B
 ```
+
+You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-speakers` folder for use. Ensure that the speaker name configuration matches exactly:
+
+![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
 
 
 ## Model Download
@@ -50,19 +54,6 @@ Download to the `ComfyUI\models\TTS` folder
 |-------|-------|
 | Step-Audio-Tokenizer | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-Tokenizer) |
 | Step-Audio-TTS-3B | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-TTS-3B) |
-
-Where_you_download_dir should have the following structure:
-```
-ComfyUI\models\TTS
-├── Step-Audio-Tokenizer
-├── Step-Audio-TTS-3B
-```
-
-### Welcome to contribute more voices
-
-The audio file is named as `{Speaker}_prompt_.WAV`, For example, `明文_prompt.WAV`. I will add them to the code. Thus, there is no need for cloning.
-
-The currently supported voices are in the `Step-Audio-speakers` folder. Welcome to PR more voices.
 
 
 ## Supports Chinese, English, Korean, Japanese, Sichuanese, Cantonese etc.

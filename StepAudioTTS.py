@@ -316,8 +316,12 @@ tts_engine = StepAudioTTS(tts_model_path, encoder)
 emotion_options = ["高兴1", "高兴2", "生气1", "生气2", "悲伤1", "撒娇1", "None"]
 language_options = ["中文", "英文", "韩语", "日语", "四川话", "粤语", "None"]
 speed_options = ["慢速1", "慢速2", "快速1", "快速2", "None"]
-speaker_options = ["婷婷", "婷婷RAP", "婷婷哼唱", "明文"]
+# speaker_options = ["婷婷", "婷婷RAP", "婷婷哼唱", "明文"]
 express_options = ["RAP", "哼唱", "None"]
+
+with open(f"{speaker_path}/speakers_info.json", "r", encoding="utf-8") as f:
+    speakers_info = json.load(f)
+speaker_options = list(speakers_info.keys())    
 
 def gen_text(*args):
     formatted_args = []
@@ -336,7 +340,7 @@ class StepAudioRun:
                 "speaker": (speaker_options, {"default": "婷婷"}),
             },
             "optional": {
-                "custom_speaker": ("STRING", {"default": "", "multiline": False}),
+                # "custom_speaker": ("STRING", {"default": "", "multiline": False}),
                 "emotion": (emotion_options, {"default": "None"}),
                 "language": (language_options, {"default": "None"}),
                 "express": (express_options, {"default": "None"}),
@@ -350,9 +354,9 @@ class StepAudioRun:
     FUNCTION = "speak"
     CATEGORY = "MW-Step-Audio"
 
-    def speak(self, text, speaker, custom_speaker, emotion, language, express, speed, custom_mark):
-        if custom_speaker.strip():
-            speaker = custom_speaker
+    def speak(self, text, speaker, emotion, language, express, speed, custom_mark):
+        # if custom_speaker.strip():
+        #     speaker = custom_speaker
         if express == "哼唱":
             conditions = ["(哼唱)"]
         elif express == "RAP":
