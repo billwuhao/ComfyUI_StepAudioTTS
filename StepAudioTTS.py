@@ -85,61 +85,6 @@ class StepAudioTTS:
         return self._music_cosy_model
 
     def __call__(self, text: str, cosy_model, prompt_speaker_info, history):
-        # instruction_name = self.detect_instruction_name(text)
-        
-        # if "RAP" in instruction_name or "哼唱" in instruction_name:
-        #     cosy_model = self.music_cosy_model
-        # else:
-        #     cosy_model = self.common_cosy_model
-
-        # prompt_speaker_info =  {}
-        # if clone_dict:
-        #     clone_prompt_code, clone_prompt_token, clone_prompt_token_len, clone_speech_feat, clone_speech_feat_len, clone_speech_embedding = (
-        #         self.preprocess_prompt_wav(clone_dict['audio'], cosy_model)
-        #     )
-        #     prompt_speaker_info =  {
-        #         "prompt_text": clone_dict['prompt_text'],
-        #         "prompt_code": clone_prompt_code,
-        #         "cosy_speech_feat": clone_speech_feat.to(torch.bfloat16),
-        #         "cosy_speech_feat_len": clone_speech_feat_len,
-        #         "cosy_speech_embedding": clone_speech_embedding.to(torch.bfloat16),
-        #         "cosy_prompt_token": clone_prompt_token,
-        #         "cosy_prompt_token_len": clone_prompt_token_len,
-        #     }
-            
-        #     prompt_speaker = clone_dict['speaker']
-        #     # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
-
-        # else:
-        #     with open(f"{speaker_path}/speakers_info.json", "r") as f:
-        #         speakers_info = json.load(f)
-
-        #     for speaker_id, prompt_text in speakers_info.items():
-        #         if speaker_id == prompt_speaker:
-        #             prompt_wav_path = f"{speaker_path}/{speaker_id}_prompt.wav"
-        #             waveform, sample_rate = torchaudio.load(prompt_wav_path)
-        #             audio = {"waveform": waveform.unsqueeze(0), "sample_rate": sample_rate}
-        #             prompt_code, prompt_token, prompt_token_len, speech_feat, speech_feat_len, speech_embedding = (
-        #                 self.preprocess_prompt_wav(audio, cosy_model)
-        #             )
-        #             prompt_speaker_info = {
-        #                 "prompt_text": prompt_text,
-        #                 "prompt_code": prompt_code,
-        #                 "cosy_speech_feat": speech_feat.to(torch.bfloat16),
-        #                 "cosy_speech_feat_len": speech_feat_len,
-        #                 "cosy_speech_embedding": speech_embedding.to(torch.bfloat16),
-        #                 "cosy_prompt_token": prompt_token,
-        #                 "cosy_prompt_token_len": prompt_token_len,
-        #             }
-        #             # print(prompt_speaker, " 内置文本: ", prompt_speaker_info["prompt_text"], end="\n\n")
-        #             break
-
-        #         elif prompt_speaker not in speakers_info.keys():
-        #             raise ValueError("There is no such speaker") 
-
-        # print("指定文本: ", text, "的说话者是: ", prompt_speaker, end="\n\n")
-        
-        # cosy_model, prompt_speaker_info, history = self.data_preprocess()
 
         _prefix_tokens = self.autotokenizer.encode("\n")
         target_token_encode = self.autotokenizer.encode("\n" + text)
@@ -482,8 +427,16 @@ class StepAudioClone:
         audio_tensor = torch.cat(audio_data, dim=1).unsqueeze(0).float()
         return ({"waveform": audio_tensor, "sample_rate": sr},)
     
+from MWAudioRecorder import AudioRecorder
 
 NODE_CLASS_MAPPINGS = {
     "StepAudioRun": StepAudioRun,
     "StepAudioClone": StepAudioClone,
+    "AudioRecorder": AudioRecorder
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "StepAudioRun": "Step Audio Run",
+    "StepAudioClone": "Step Audio Clone",
+    "AudioRecorder": "MW Audio Recorder"
 }

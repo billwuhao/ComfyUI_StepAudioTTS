@@ -6,6 +6,10 @@
 
 ## Update
 
+[2025-03-06]⚒️: New recording node `MW Audio Recorder` can be used to record audio with a microphone, and the progress bar displays the recording progress:
+
+![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
+
 [2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
 
 [2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. But please note that the three places in the figure must maintain consistent speaker name. When customizing, the `speaker` will automatically become invalid.

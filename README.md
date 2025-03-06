@@ -6,6 +6,10 @@
 
 ## 更新
 
+[2025-03-06]⚒️: 新增录音节点 `MW Audio Recorder` 可用麦克风录制音频, 进度条显示录制进度:
+
+![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
+
 [2025-03-02]⚒️: 增加实验性的 `custom_mark`, 用 "()" 包围例如 `(温柔)(东北话)`, 它可能会有效.
 
 [2025-02-25]⚒️: 支持自定义说话者 `custom_speaker`. 但注意下图三个地方必须保持一致的说话者名称. 自定义时 `speaker` 将自动无效.
