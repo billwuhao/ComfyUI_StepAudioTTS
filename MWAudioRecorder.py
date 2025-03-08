@@ -131,10 +131,10 @@ class AudioRecorder:
         return (final_audio,)
 
 # 节点注册
-NODE_CLASS_MAPPINGS = {
-    "AudioRecorder": AudioRecorder
-}
+# NODE_CLASS_MAPPINGS = {
+#     "AudioRecorder": AudioRecorder
+# }
 
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "AudioRecorder": "MW Audio Recorder"
-}
+# NODE_DISPLAY_NAME_MAPPINGS = {
+#     "AudioRecorder": "MW Audio Recorder"
+# }

@@ -8,6 +8,19 @@
 
 [2025-03-07]⚒️: 自定义说话者直接在 `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` 中定义, 无需节点中输入. 
 
+请将本仓库中 `Step-Audio-speakers` 文件夹移动到 `ComfyUI\models\TTS` 文件夹中, 结构如下:
+
+```
+ComfyUI\models\TTS
+├── Step-Audio-Tokenizer
+├── Step-Audio-speakers
+├── Step-Audio-TTS-3B
+```
+
+然后就可在 `ComfyUI\models\TTS\Step-Audio-speakers` 文件夹下随意自定义说话者即可使用. 注意说话者名称配置一定要一致:
+
+![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
+
 [2025-03-06]⚒️: 新增录音节点 `MW Audio Recorder` 可用麦克风录制音频, 进度条显示录制进度:
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
@@ -24,19 +37,6 @@
 [2025-03-02]⚒️: 增加实验性的 `custom_mark`, 用 "()" 包围例如 `(温柔)(东北话)`, 它可能会有效.
 
 [2025-02-25]⚒️: 支持自定义说话者 `custom_speaker`. 
-
-请将本仓库中 `Step-Audio-speakers` 文件夹移动到 `ComfyUI\models\TTS` 文件夹中, 结构如下:
-
-```
-ComfyUI\models\TTS
-├── Step-Audio-Tokenizer
-├── Step-Audio-speakers
-├── Step-Audio-TTS-3B
-```
-
-然后就可在 `ComfyUI\models\TTS\Step-Audio-speakers` 文件夹下随意自定义说话者即可使用. 注意说话者名称配置一定要一致:
-
-![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
 
 
 ## 模型下载

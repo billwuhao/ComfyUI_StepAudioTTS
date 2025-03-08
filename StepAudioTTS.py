@@ -223,11 +223,10 @@ class StepAudioTTS:
         prompt_speaker: str, 
         prompt_code: list
     ):
-        
         sys_prompt_dict = {
             "sys_prompt_for_rap": "请用 RAP 方式将文本内容大声说唱出来。[] 括号内标注了说唱者的名字, 请使用 [{}] 的声音, 大声说唱出其后面的文本内容: ",
             "sys_prompt_for_vocal": "请用哼唱的方式将文本内容大声唱出来。[] 括号内标注了唱歌者的名字, 请使用 [{}] 的声音, 大声唱出其后面的文本内容: ",
-            "sys_prompt_for_spk": '作为一名卓越的声优演员，你的任务是根据文本中 （） 或 () 括号内标注的情感、语种或方言、音乐哼唱、语音调整等标签，以丰富细腻的情感和自然顺畅的语调，来朗读文本。\n# 情感标签涵盖了多种情绪状态，包括但不限于：\n- "高兴1"\n- "高兴2"\n- "生气1"\n- "生气2"\n- "悲伤1"\n- "撒娇1"\n\n# 语种或方言标签包含多种语言或方言，包括但不限于：\n- "中文"\n- "英文"\n- "韩语"\n- "日语"\n- "四川话"\n- "粤语"\n\n# 音乐哼唱标签包含多种类型歌曲哼唱，包括但不限于：\n- "RAP"\n- "哼唱"\n\n# 语音调整标签，包括但不限于：\n- "慢速1"\n- "慢速2"\n- "快速1"\n- "快速2"\n\n请在朗读时，根据这些情感标签的指示，调整你的情感、语气、语调和哼唱节奏，以确保文本的情感和意义得到准确而生动的传达，如果没有 () 或 （） 括号，则根据文本语义内容恰到好处地演绎。[] 括号内标注了朗读者的名字, 请使用 [{}] 的声音, 大声朗读出其后面的文本内容: ',
+            "sys_prompt_for_spk": '作为一名卓越的声优演员，你的任务是根据文本中 （） 或 () 括号内标注的情感、语种或方言、音乐哼唱、语音调整等标签，以丰富细腻的情感和自然顺畅的语调，来朗读文本。[] 括号内标注了朗读者的名字, 请使用 [{}] 的声音, 大声朗读出其后面的文本内容: \n# 情感标签涵盖了多种情绪状态，包括但不限于：\n- "高兴1"\n- "高兴2"\n- "生气1"\n- "生气2"\n- "悲伤1"\n- "撒娇1"\n\n# 语种或方言标签包含多种语言或方言，包括但不限于：\n- "中文"\n- "英文"\n- "韩语"\n- "日语"\n- "四川话"\n- "粤语"\n\n# 音乐哼唱标签包含多种类型歌曲哼唱，包括但不限于：\n- "RAP"\n- "哼唱"\n\n# 语音调整标签，包括但不限于：\n- "慢速1"\n- "慢速2"\n- "快速1"\n- "快速2"\n\n请在朗读时，根据这些情感标签的指示，调整你的情感、语气、语调和哼唱节奏，以确保文本的情感和意义得到准确而生动的传达，如果没有 () 或 （） 括号，则根据文本语义内容恰到好处地演绎。',
         }
 
         # rap_or_vocal = self.detect_instruction_name(text)
@@ -383,7 +382,7 @@ class StepAudioClone:
         return {
             "required": {
                 "text": ("STRING", {"default": "", "multiline": True}),
-                "speaker_name": ("STRING", {"default": "", "multiline": False}),
+                "speaker_name": ("STRING", {"default": "无名", "multiline": False}),
                 "clone_text": ("STRING", {"default": "", "multiline": True, "tooltip": "The clone audio's text."}),
                 "clone_audio": ("AUDIO", ),
             },
@@ -410,7 +409,7 @@ class StepAudioClone:
             conditions = gen_text(emotion, language, speed, custom_mark)
         # print(conditions, end="\n\n")
         if not speaker_name.strip():
-            speaker_name = "wuming"
+            speaker_name = "无名"
         clone_text = "".join(conditions) + f"[{speaker_name}]: {clone_text}"
         # print(clone_text, end="\n\n")
         clone_speaker_info = {

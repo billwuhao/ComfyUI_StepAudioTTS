@@ -8,6 +8,19 @@
 
 [2025-03-07]⚒️: Custom speakers can be defined directly in `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` without the need for input in the node.
 
+Move the `Step-Audio-speakers` folder from this repository to the `ComfyUI\models\TTS` folder. The structure is as follows:
+
+```
+ComfyUI\models\TTS
+├── Step-Audio-Tokenizer
+├── Step-Audio-speakers
+├── Step-Audio-TTS-3B
+```
+
+You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-speakers` folder for use. Ensure that the speaker name configuration matches exactly:
+
+![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
+
 [2025-03-06]⚒️: New recording node `MW Audio Recorder` can be used to record audio with a microphone, and the progress bar displays the recording progress:
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
@@ -24,20 +37,6 @@
 [2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
 
 [2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. 
-
-Move the `Step-Audio-speakers` folder from this repository to the `ComfyUI\models\TTS` folder. The structure is as follows:
-
-```
-ComfyUI\models\TTS
-├── Step-Audio-Tokenizer
-├── Step-Audio-speakers
-├── Step-Audio-TTS-3B
-```
-
-You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-speakers` folder for use. Ensure that the speaker name configuration matches exactly:
-
-![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
-
 
 ## Model Download
 
