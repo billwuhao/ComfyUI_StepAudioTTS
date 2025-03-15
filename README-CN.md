@@ -1,14 +1,14 @@
-[中文](README.md) | English
+中文 | [English](README.md)
 
-# A Text To Speech node using Step-Audio-TTS in ComfyUI. Can speak, rap, sing, or clone voice.
+# Step-Audio-TTS 的 ComfyUI 节点, 文本转语音, 可说话, 唱歌, RAP, 或者克隆声音.
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-02-21_05-34-25.png)
 
-## Update
+## 更新
 
-[2025-03-07]⚒️: Custom speakers can be defined directly in `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` without the need for input in the node.
+[2025-03-07]⚒️: 自定义说话者直接在 `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` 中定义, 无需节点中输入. 
 
-Move the `Step-Audio-speakers` folder from this repository to the `ComfyUI\models\TTS` folder. The structure is as follows:
+请将本仓库中 `Step-Audio-speakers` 文件夹移动到 `ComfyUI\models\TTS` 文件夹中, 结构如下:
 
 ```
 ComfyUI\models\TTS
@@ -17,11 +17,11 @@ ComfyUI\models\TTS
 ├── Step-Audio-TTS-3B
 ```
 
-You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-speakers` folder for use. Ensure that the speaker name configuration matches exactly:
+然后就可在 `ComfyUI\models\TTS\Step-Audio-speakers` 文件夹下随意自定义说话者即可使用. 注意说话者名称配置一定要一致:
 
 ![](https://github.com/billwuhao/ComfyUI_SparkTTS/blob/master/images/2025-03-07_03-30-51.png)
 
-[2025-03-06]⚒️: New recording node `MW Audio Recorder` can be used to record audio with a microphone, and the progress bar displays the recording progress:
+[2025-03-06]⚒️: 新增录音节点 `MW Audio Recorder` 可用麦克风录制音频, 进度条显示录制进度:
 
 ![](https://github.com/billwuhao/ComfyUI_StepAudioTTS/blob/master/assets/2025-03-06_21-29-09.png)
 
@@ -34,11 +34,11 @@ You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-
 | **smooth**          | 时频平滑系数（值越高越自然）<br>Time-frequency smoothing (higher=more natural)       | 1,3,5,7,9,11 (奇数/odd numbers) | 建议语音：5，音乐：7<br>Recommended: 5 for speech, 7 for music                          |
 | **sample_rate**     | 采样率（影响音质与文件大小）<br>Sampling rate (affects quality & size)               | 16000/44100/48000 Hz           | 44100=CD音质<br>44100=CD quality                                                         |
 
-[2025-03-02]⚒️: Add experimental `custom_mark`, surrounding with "()", for example `(温柔)(东北话)`, it may have an effect.
+[2025-03-02]⚒️: 增加实验性的 `custom_mark`, 用 "()" 包围例如 `(温柔)(东北话)`, 它可能会有效.
 
-[2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. 
+[2025-02-25]⚒️: 支持自定义说话者 `custom_speaker`. 
 
-## Installation
+## 安装
 
 ```
 cd ComfyUI/custom_nodes
@@ -50,31 +50,30 @@ pip install -r requirements.txt
 ./python_embeded/python.exe -m pip install -r requirements.txt
 ```
 
-## Model Download
+## 模型下载
 
-Download to the `ComfyUI\models\TTS` folder
+下载到 `ComfyUI\models\TTS` 文件夹中.
 
 ### Huggingface
-| Models   | Links   |
+| 模型   | 链接   |
 |-------|-------|
 | Step-Audio-Tokenizer | [🤗huggingface](https://huggingface.co/stepfun-ai/Step-Audio-Tokenizer) |
 | Step-Audio-TTS-3B | [🤗huggingface](https://huggingface.co/stepfun-ai/Step-Audio-TTS-3B) |
 
 ### Modelscope
-| Models   | Links   |
+| 模型   | 链接   |
 |-------|-------|
 | Step-Audio-Tokenizer | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-Tokenizer) |
 | Step-Audio-TTS-3B | [modelscope](https://modelscope.cn/models/stepfun-ai/Step-Audio-TTS-3B) |
 
+## 支持 中文, 英文, 韩语, 日语, 四川话, 粤语等
 
-## Supports Chinese, English, Korean, Japanese, Sichuanese, Cantonese etc.
+## 致谢
 
-## Acknowledgements
-
-Part of the code for this project comes from:
+本项目的部分代码来自：
 * [Step-Audio](https://github.com/stepfun-ai/Step-Audio)
 * [CosyVoice](https://github.com/FunAudioLLM/CosyVoice)
 * [transformers](https://github.com/huggingface/transformers)
 * [FunASR](https://github.com/modelscope/FunASR)
 
-Thank you to all the open-source projects for their contributions to this project!
+感谢以上所有开源项目对本项目开源做出的贡献！
