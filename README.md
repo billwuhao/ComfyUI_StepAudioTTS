@@ -38,6 +38,17 @@ ComfyUI\models\TTS
 
 [2025-02-25]⚒️: 支持自定义说话者 `custom_speaker`. 
 
+## 安装
+
+```
+cd ComfyUI/custom_nodes
+git clone https://github.com/billwuhao/ComfyUI_StepAudioTTS.git
+cd ComfyUI_StepAudioTTS
+pip install -r requirements.txt
+
+# python_embeded
+./python_embeded/python.exe -m pip install -r requirements.txt
+```
 
 ## 模型下载
 

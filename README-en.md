@@ -38,6 +38,18 @@ You can then freely customize speakers under the `ComfyUI\models\TTS\Step-Audio-
 
 [2025-02-25]⚒️: Support custom speaker `custom_stpeaker`. 
 
+## Installation
+
+```
+cd ComfyUI/custom_nodes
+git clone https://github.com/billwuhao/ComfyUI_StepAudioTTS.git
+cd ComfyUI_StepAudioTTS
+pip install -r requirements.txt
+
+# python_embeded
+./python_embeded/python.exe -m pip install -r requirements.txt
+```
+
 ## Model Download
 
 Download to the `ComfyUI\models\TTS` folder

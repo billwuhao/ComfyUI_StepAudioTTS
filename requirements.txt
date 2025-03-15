@@ -1,18 +1,14 @@
-# torch==2.3.1
-# torchaudio==2.3.1
-# torchvision==0.18.1
-# accelerate==1.3.0
-# onnxruntime-gpu==1.17.0
-# omegaconf==2.3.0
-# librosa==0.10.2.post1
-# modelscope
-# numpy==1.26.4
-# six==1.16.0
-# diffusers
-# pillow
-# sentencepiece
-# protobuf==5.29.3
-
+accelerate
+onnxruntime-gpu
+omegaconf
+librosa>=0.10.2.post1
+modelscope
+numpy
+six
+diffusers
+pillow
+sentencepiece
+protobuf
 transformers
 openai-whisper
 sox

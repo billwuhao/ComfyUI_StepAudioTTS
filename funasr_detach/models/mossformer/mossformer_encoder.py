@@ -2,12 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-try:
-    from rotary_embedding_torch import RotaryEmbedding
-except:
-    print(
-        "If you want use mossformer, please install rotary_embedding_torch by: \n pip install -U rotary_embedding_torch"
-    )
 from funasr_detach.models.transformer.layer_norm import (
     GlobalLayerNorm,
     CumulativeLayerNorm,
@@ -57,6 +51,12 @@ class MossformerBlock(nn.Module):
 
         self.group_size = group_size
 
+        try:
+            from rotary_embedding_torch import RotaryEmbedding
+        except:
+            print(
+                "If you want use mossformer, please install rotary_embedding_torch by: \n pip install -U rotary_embedding_torch"
+            )
         rotary_pos_emb = RotaryEmbedding(dim=min(32, query_key_dim))
         # max rotary embedding dimensions of 32, partial Rotary embeddings, from Wang et al - GPT-J
         self.layers = nn.ModuleList(

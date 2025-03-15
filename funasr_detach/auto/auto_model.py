@@ -20,11 +20,6 @@ from funasr_detach.utils.load_utils import load_audio_text_image_video
 from funasr_detach.utils.timestamp_tools import timestamp_sentence
 from funasr_detach.models.campplus.utils import sv_chunk, postprocess, distribute_spk
 
-try:
-    from funasr_detach.models.campplus.cluster_backend import ClusterBackend
-except:
-    print("If you want to use the speaker diarization, please `pip install hdbscan`")
-
 
 def prepare_data_iterator(data_in, input_len=None, data_type=None, key=None):
     """
@@ -134,6 +129,12 @@ class AutoModel:
         # if spk_model is not None, build spk model else None
         spk_model = kwargs.get("spk_model", None)
         spk_kwargs = kwargs.get("spk_model_revision", None)
+                
+        try:
+            from funasr_detach.models.campplus.cluster_backend import ClusterBackend
+        except:
+            print("If you want to use the speaker diarization, please `pip install hdbscan`")
+
         if spk_model is not None:
             logging.info("Building SPK model.")
             spk_kwargs = {

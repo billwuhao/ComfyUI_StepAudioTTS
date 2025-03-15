@@ -7,6 +7,10 @@ import numpy as np
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.generation.logits_process import LogitsProcessor
 from transformers.generation.utils import LogitsProcessorList
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
 
 from tokenizer import StepAudioTokenizer
 from cosyvoice.cli.cosyvoice import CosyVoice 
