@@ -23,19 +23,17 @@ class StepAudioTokenizer:
             encoder_path,
             "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online",
         )
-        kms_path = os.path.join(encoder_path, "linguistic_tokenizer.npy")
-        cosy_tokenizer_path = os.path.join(encoder_path, "speech_tokenizer_v1.onnx")
-        self.kms = torch.tensor(np.load(kms_path))
+        self.kms_path = os.path.join(encoder_path, "linguistic_tokenizer.npy")
+        self.cosy_tokenizer_path = os.path.join(encoder_path, "speech_tokenizer_v1.onnx")
+        self._kms = None
 
-        providers = ["CUDAExecutionProvider"]
-        session_option = onnxruntime.SessionOptions()
-        session_option.graph_optimization_level = (
+        self.providers = ["CUDAExecutionProvider"]
+        self.session_option = onnxruntime.SessionOptions()
+        self.session_option.graph_optimization_level = (
             onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
         )
-        session_option.intra_op_num_threads = 1
-        self.ort_session = onnxruntime.InferenceSession(
-            cosy_tokenizer_path, sess_options=session_option, providers=providers
-        )
+        self.session_option.intra_op_num_threads = 1
+        self._ort_session = None
         self.chunk_size = [0, 4, 5]
         self.encoder_chunk_look_back = 4
         self.decoder_chunk_look_back = 1
@@ -44,6 +42,19 @@ class StepAudioTokenizer:
         self.vq02_lock = threading.Lock()
         self.vq06_lock = threading.Lock()
 
+    @property
+    def ort_session(self):
+        if self._ort_session is None:
+            self._ort_session = onnxruntime.InferenceSession(
+            self.cosy_tokenizer_path, sess_options=self.session_option, providers=self.providers
+        )
+        return self._ort_session
+
+    @property
+    def kms(self):
+        if self._kms is None:
+            self._kms = torch.tensor(np.load(self.kms_path))
+        return self._kms
 
     @property
     def funasr_model(self):
