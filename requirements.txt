@@ -18,3 +18,4 @@ funasr>=1.1.3
 sounddevice
 noisereduce
 scipy
+transformers>=4.48.3
