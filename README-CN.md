@@ -6,6 +6,8 @@
 
 ## 更新
 
+[2025-03-21]⚒️: 完全重构代码, 增加更多可调参数, 可根据文本长短调节 max_length. 可选 unload_model, 是否卸载模型, 加快推理速度.
+
 [2025-03-07]⚒️: 自定义说话者直接在 `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` 中定义, 无需节点中输入. 
 
 请将本仓库中 `Step-Audio-speakers` 文件夹移动到 `ComfyUI\models\TTS` 文件夹中, 结构如下:

@@ -6,6 +6,8 @@
 
 ## Update
 
+[2025-03-21] ⚒️: Completely refactored the code, added more tunable parameters, and `max_length` can be adjusted according to the text length.  Optional `unload_model` to choose whether to unload the model to accelerate inference speed.
+
 [2025-03-07]⚒️: Custom speakers can be defined directly in `ComfyUI\models\TTS\Step-Audio-speakers\speakers_info.json` without the need for input in the node.
 
 Move the `Step-Audio-speakers` folder from this repository to the `ComfyUI\models\TTS` folder. The structure is as follows:
