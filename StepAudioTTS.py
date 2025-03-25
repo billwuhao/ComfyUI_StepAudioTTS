@@ -583,7 +583,7 @@ class StepAudioRun:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("audio",)
     FUNCTION = "speak"
-    CATEGORY = "MW/MW-Step-Audio"
+    CATEGORY = "🎤MW/MW-Step-Audio"
 
     def speak(self, 
               text, 
@@ -687,7 +687,7 @@ class StepAudioClone:
     RETURN_TYPES = ("AUDIO",)
     RETURN_NAMES = ("audio",)
     FUNCTION = "clone"
-    CATEGORY = "MW/MW-Step-Audio"
+    CATEGORY = "🎤MW/MW-Step-Audio"
 
     def clone(self, 
               text, 
