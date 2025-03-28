@@ -52,53 +52,61 @@ def load_models(device, use_cache=True):
             CACHED_MODELS["common_cosy_model"],
             CACHED_MODELS["music_cosy_model"],
         )
+    else:
+        funasr_model_path = os.path.join(
+            encoder_model_path,
+            "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online",
+        )
+        funasr_model = AutoModel(model=funasr_model_path, model_revision="master", device=device)
 
-    funasr_model_path = os.path.join(
-        encoder_model_path,
-        "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online",
-    )
-    funasr_model = AutoModel(model=funasr_model_path, model_revision="master", device=device)
+        cosy_tokenizer_path = os.path.join(encoder_model_path, "speech_tokenizer_v1.onnx")
+        providers = ["CUDAExecutionProvider"]
+        session_option = onnxruntime.SessionOptions()
+        session_option.graph_optimization_level = (
+            onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+        )
+        session_option.intra_op_num_threads = 1
+        ort_cosy_tokenizer = onnxruntime.InferenceSession(
+            cosy_tokenizer_path, sess_options=session_option, providers=providers
+        )
 
-    cosy_tokenizer_path = os.path.join(encoder_model_path, "speech_tokenizer_v1.onnx")
-    providers = ["CUDAExecutionProvider"]
-    session_option = onnxruntime.SessionOptions()
-    session_option.graph_optimization_level = (
-        onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
-    )
-    session_option.intra_op_num_threads = 1
-    ort_cosy_tokenizer = onnxruntime.InferenceSession(
-        cosy_tokenizer_path, sess_options=session_option, providers=providers
-    )
-
-    llm = AutoModelForCausalLM.from_pretrained(
-        tts_model_path,
-        torch_dtype=torch.bfloat16,
-        device_map=device,
-        trust_remote_code=True,
-    )
-    autotokenizer = AutoTokenizer.from_pretrained(
-        tts_model_path,
-        trust_remote_code=True
-    )
-    common_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz"))
-    music_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz-Music"))
-    
-    CACHED_MODELS["funasr_model"] = funasr_model
-    CACHED_MODELS["ort_cosy_tokenizer"] = ort_cosy_tokenizer
-    CACHED_MODELS["llm"] = llm
-    CACHED_MODELS["autotokenizer"] = autotokenizer
-    CACHED_MODELS["common_cosy_model"] = common_cosy_model
-    CACHED_MODELS["music_cosy_model"] = music_cosy_model
-    
-    return (
-        CACHED_MODELS["funasr_model"],
-        kms,
-        CACHED_MODELS["ort_cosy_tokenizer"],
-        CACHED_MODELS["llm"],
-        CACHED_MODELS["autotokenizer"],
-        CACHED_MODELS["common_cosy_model"],
-        CACHED_MODELS["music_cosy_model"],
-    )
+        llm = AutoModelForCausalLM.from_pretrained(
+            tts_model_path,
+            torch_dtype=torch.bfloat16,
+            device_map=device,
+            trust_remote_code=True,
+        )
+        autotokenizer = AutoTokenizer.from_pretrained(
+            tts_model_path,
+            trust_remote_code=True
+        )
+        common_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz"))
+        music_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz-Music"))
+        
+        CACHED_MODELS["funasr_model"] = funasr_model
+        CACHED_MODELS["ort_cosy_tokenizer"] = ort_cosy_tokenizer
+        CACHED_MODELS["llm"] = llm
+        CACHED_MODELS["autotokenizer"] = autotokenizer
+        CACHED_MODELS["common_cosy_model"] = common_cosy_model
+        CACHED_MODELS["music_cosy_model"] = music_cosy_model
+        del funasr_model
+        del ort_cosy_tokenizer
+        del llm
+        del autotokenizer
+        del common_cosy_model
+        del music_cosy_model
+        gc.collect()
+        torch.cuda.empty_cache()
+        
+        return (
+            CACHED_MODELS["funasr_model"],
+            kms,
+            CACHED_MODELS["ort_cosy_tokenizer"],
+            CACHED_MODELS["llm"],
+            CACHED_MODELS["autotokenizer"],
+            CACHED_MODELS["common_cosy_model"],
+            CACHED_MODELS["music_cosy_model"],
+        )
 
 
 def clear_cached_models():
