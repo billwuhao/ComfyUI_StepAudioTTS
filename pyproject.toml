@@ -12,4 +12,4 @@ Repository = "https://github.com/billwuhao/ComfyUI_StepAudioTTS"
 [tool.comfy]
 PublisherId = "mw"
 DisplayName = "ComfyUI_StepAudioTTS"
-Icon = "https://github.com/billwuhao/aiart.website/blob/master/hb.png"
+Icon = ""
