@@ -21,99 +21,59 @@ from sa_utils import resample_audio, energy_norm_fn, trim_silence
 from funasr_detach import AutoModel 
 from cosyvoice.cli.cosyvoice import CosyVoice 
 
+import folder_paths
 
-node_dir = os.path.dirname(os.path.abspath(__file__))
-comfy_path = os.path.dirname(os.path.dirname(node_dir))
-model_path = os.path.join(comfy_path, "models/TTS")
+
+models_dir = folder_paths.models_dir
+model_path = os.path.join(models_dir, "TTS")
 encoder_model_path = os.path.join(model_path, "Step-Audio-Tokenizer")
 tts_model_path = os.path.join(model_path, "Step-Audio-TTS-3B")
 speaker_path = os.path.join(model_path, "Step-Audio-speakers")
 
-CACHED_MODELS = {
-    "funasr_model": None,
-    "ort_cosy_tokenizer": None,
-    "llm": None,
-    "autotokenizer": None,
-    "common_cosy_model": None,
-    "music_cosy_model": None,
-}
 
-def load_models(device, use_cache=True):
+def load_models(device):
     kms_path = os.path.join(encoder_model_path, "linguistic_tokenizer.npy")
     kms = torch.tensor(np.load(kms_path))
+
+    funasr_model_path = os.path.join(
+        encoder_model_path,
+        "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online",
+    )
+    funasr_model = AutoModel(model=funasr_model_path, model_revision="master", device=device)
+
+    cosy_tokenizer_path = os.path.join(encoder_model_path, "speech_tokenizer_v1.onnx")
+    providers = ["CUDAExecutionProvider"]
+    session_option = onnxruntime.SessionOptions()
+    session_option.graph_optimization_level = (
+        onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
+    )
+    session_option.intra_op_num_threads = 1
+    ort_cosy_tokenizer = onnxruntime.InferenceSession(
+        cosy_tokenizer_path, sess_options=session_option, providers=providers
+    )
+
+    llm = AutoModelForCausalLM.from_pretrained(
+        tts_model_path,
+        torch_dtype=torch.bfloat16,
+        device_map=device,
+        trust_remote_code=True,
+    )
+    autotokenizer = AutoTokenizer.from_pretrained(
+        tts_model_path,
+        trust_remote_code=True
+    )
+    common_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz"))
+    music_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz-Music"))
     
-    if use_cache and all(CACHED_MODELS.values()):
-        return (
-            CACHED_MODELS["funasr_model"],
-            kms,
-            CACHED_MODELS["ort_cosy_tokenizer"],
-            CACHED_MODELS["llm"],
-            CACHED_MODELS["autotokenizer"],
-            CACHED_MODELS["common_cosy_model"],
-            CACHED_MODELS["music_cosy_model"],
-        )
-    else:
-        funasr_model_path = os.path.join(
-            encoder_model_path,
-            "dengcunqin/speech_paraformer-large_asr_nat-zh-cantonese-en-16k-vocab8501-online",
-        )
-        funasr_model = AutoModel(model=funasr_model_path, model_revision="master", device=device)
-
-        cosy_tokenizer_path = os.path.join(encoder_model_path, "speech_tokenizer_v1.onnx")
-        providers = ["CUDAExecutionProvider"]
-        session_option = onnxruntime.SessionOptions()
-        session_option.graph_optimization_level = (
-            onnxruntime.GraphOptimizationLevel.ORT_ENABLE_ALL
-        )
-        session_option.intra_op_num_threads = 1
-        ort_cosy_tokenizer = onnxruntime.InferenceSession(
-            cosy_tokenizer_path, sess_options=session_option, providers=providers
-        )
-
-        llm = AutoModelForCausalLM.from_pretrained(
-            tts_model_path,
-            torch_dtype=torch.bfloat16,
-            device_map=device,
-            trust_remote_code=True,
-        )
-        autotokenizer = AutoTokenizer.from_pretrained(
-            tts_model_path,
-            trust_remote_code=True
-        )
-        common_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz"))
-        music_cosy_model = CosyVoice(os.path.join(tts_model_path, "CosyVoice-300M-25Hz-Music"))
-        
-        CACHED_MODELS["funasr_model"] = funasr_model
-        CACHED_MODELS["ort_cosy_tokenizer"] = ort_cosy_tokenizer
-        CACHED_MODELS["llm"] = llm
-        CACHED_MODELS["autotokenizer"] = autotokenizer
-        CACHED_MODELS["common_cosy_model"] = common_cosy_model
-        CACHED_MODELS["music_cosy_model"] = music_cosy_model
-        del funasr_model
-        del ort_cosy_tokenizer
-        del llm
-        del autotokenizer
-        del common_cosy_model
-        del music_cosy_model
-        gc.collect()
-        torch.cuda.empty_cache()
-        
-        return (
-            CACHED_MODELS["funasr_model"],
-            kms,
-            CACHED_MODELS["ort_cosy_tokenizer"],
-            CACHED_MODELS["llm"],
-            CACHED_MODELS["autotokenizer"],
-            CACHED_MODELS["common_cosy_model"],
-            CACHED_MODELS["music_cosy_model"],
-        )
-
-
-def clear_cached_models():
-    for key in CACHED_MODELS:
-        CACHED_MODELS[key] = None
-    gc.collect()
-    torch.cuda.empty_cache()
+    return (
+        funasr_model,
+        kms,
+        ort_cosy_tokenizer,
+        llm,
+        autotokenizer,
+        common_cosy_model,
+        music_cosy_model,
+    )
 
 
 class StepAudioTokenizer:
@@ -567,6 +527,16 @@ def gen_tags(*args):
     return formatted_args
 
 class StepAudioRun:
+    def __init__(self):
+        self.funasr_model = None
+        self.kms = None
+        self.ort_cosy_tokenizer = None
+        self.llm = None
+        self.autotokenizer = None
+        self.common_cosy_model = None
+        self.music_cosy_model = None
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        
     @classmethod
     def INPUT_TYPES(s):
         
@@ -584,7 +554,7 @@ class StepAudioRun:
                 "max_length": ("INT", {"default": 8192, "min": 0}),
                 "do_sample": ("BOOLEAN", {"default": True,}),
                 "custom_mark": ("STRING", {"default": "", "multiline": False}),
-                "unload_model": ("BOOLEAN", {"default": False,}),
+                "unload_model": ("BOOLEAN", {"default": True,}),
             }
         }
 
@@ -607,14 +577,14 @@ class StepAudioRun:
               unload_model=False,
               ):
                 
-        device = "cuda"
-        funasr_model, kms, ort_cosy_tokenizer, llm, autotokenizer, common_cosy_model, music_cosy_model = load_models(device, use_cache=True)
+        if self.funasr_model is None:
+            self.funasr_model, self.kms, self.ort_cosy_tokenizer, self.llm, self.autotokenizer, self.common_cosy_model, self.music_cosy_model = load_models(self.device)
 
         encoder = StepAudioTokenizer(
-            funasr_model,
-            kms,
-            ort_cosy_tokenizer,
-            device,
+            self.funasr_model,
+            self.kms,
+            self.ort_cosy_tokenizer,
+            self.device,
         )
         custom_mark = custom_mark.strip() if custom_mark.strip() else None
         
@@ -626,16 +596,16 @@ class StepAudioRun:
             marks = gen_tags(emotion, language, speed, custom_mark)
 
         if "(RAP)" in marks or "(哼唱)" in marks:
-            cosy_model = music_cosy_model
+            cosy_model = self.music_cosy_model
         else:
-            cosy_model = common_cosy_model
+            cosy_model = self.common_cosy_model
 
         tts_engine = StepAudioTTS(
             encoder,
-            llm,
-            autotokenizer,
+            self.llm,
+            self.autotokenizer,
             cosy_model,
-            device,
+            self.device,
         )
         
         text = "".join(marks) + f"[{speaker}]: " + text
@@ -655,14 +625,13 @@ class StepAudioRun:
         if unload_model:
             tts_engine.cleanup()
             encoder.cleanup()
-            clear_cached_models()
-            del funasr_model
-            del kms
-            del ort_cosy_tokenizer
-            del llm
-            del autotokenizer
-            del common_cosy_model
-            del music_cosy_model
+            self.funasr_model = None
+            self.kms = None
+            self.ort_cosy_tokenizer = None
+            self.llm = None
+            self.autotokenizer = None
+            self.common_cosy_model = None
+            self.music_cosy_model = None
             del cosy_model
             gc.collect()
             torch.cuda.empty_cache()
@@ -671,6 +640,16 @@ class StepAudioRun:
 
 
 class StepAudioClone:
+    def __init__(self):
+        self.funasr_model = None
+        self.kms = None
+        self.ort_cosy_tokenizer = None
+        self.llm = None
+        self.autotokenizer = None
+        self.common_cosy_model = None
+        self.music_cosy_model = None
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+
     @classmethod
     def INPUT_TYPES(s):
         return {
@@ -688,7 +667,7 @@ class StepAudioClone:
                 "max_length": ("INT", {"default": 8192, "min": 0}),
                 "do_sample": ("BOOLEAN", {"default": True,}),
                 "custom_mark": ("STRING", {"default": "", "multiline": False}),
-                "unload_model": ("BOOLEAN", {"default": False,}),
+                "unload_model": ("BOOLEAN", {"default": True,}),
             }
         }
 
@@ -712,15 +691,16 @@ class StepAudioClone:
               unload_model=False,
               ):
                 
-        device = "cuda"
-        funasr_model, kms, ort_cosy_tokenizer, llm, autotokenizer, common_cosy_model, music_cosy_model = load_models(device, use_cache=True)
-
+        if self.funasr_model is None:
+            self.funasr_model, self.kms, self.ort_cosy_tokenizer, self.llm, self.autotokenizer, self.common_cosy_model, self.music_cosy_model = load_models(self.device)
+        
         encoder = StepAudioTokenizer(
-            funasr_model,
-            kms,
-            ort_cosy_tokenizer,
-            device,
+            self.funasr_model,
+            self.kms,
+            self.ort_cosy_tokenizer,
+            self.device,
         )
+        
         custom_mark = custom_mark.strip() if custom_mark.strip() else None
         
         if express == "哼唱":
@@ -731,16 +711,16 @@ class StepAudioClone:
             marks = gen_tags(emotion, language, speed, custom_mark)
 
         if "(RAP)" in marks or "(哼唱)" in marks:
-            cosy_model = music_cosy_model
+            cosy_model = self.music_cosy_model
         else:
-            cosy_model = common_cosy_model
+            cosy_model = self.common_cosy_model
 
         tts_engine = StepAudioTTS(
             encoder,
-            llm,
-            autotokenizer,
+            self.llm,
+            self.autotokenizer,
             cosy_model,
-            device,
+            self.device,
         )
 
         text = "".join(marks) + f" {text}"
@@ -761,14 +741,13 @@ class StepAudioClone:
         if unload_model:
             tts_engine.cleanup()
             encoder.cleanup()
-            clear_cached_models()
-            del funasr_model
-            del kms
-            del ort_cosy_tokenizer
-            del llm
-            del autotokenizer
-            del common_cosy_model
-            del music_cosy_model
+            self.funasr_model = None
+            self.kms = None
+            self.ort_cosy_tokenizer = None
+            self.llm = None
+            self.autotokenizer = None
+            self.common_cosy_model = None
+            self.music_cosy_model = None
             del cosy_model
             gc.collect()
             torch.cuda.empty_cache()

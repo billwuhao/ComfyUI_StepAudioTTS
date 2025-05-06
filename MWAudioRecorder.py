@@ -11,7 +11,6 @@ class AudioRecorder:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "trigger": ("BOOLEAN", {"default": False}),
                 "record_sec": ("INT", {
                     "default": 5, 
                     "min": 1, 
@@ -39,7 +38,10 @@ class AudioRecorder:
                     "step": 2
                 }),
                 "seed": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFFFFFFFFFFFF}),
-            }
+            },
+            "optional": {
+                "enable": ("BOOLEAN", {"default": True}),
+            },
         }
 
     RETURN_TYPES = ("AUDIO",)
