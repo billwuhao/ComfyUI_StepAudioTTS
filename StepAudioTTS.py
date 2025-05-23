@@ -526,15 +526,17 @@ def gen_tags(*args):
             formatted_args.append(f"({arg})")
     return formatted_args
 
+
+FUNASR_MODEL = None
+KMS = None
+ORT_COSY_TOKENIZER = None
+LLM = None
+AUTOTOKENIZER = None
+COMMON_COSY_MODEL = None
+MUSIC_COSY_MODEL = None
+
 class StepAudioRun:
     def __init__(self):
-        self.funasr_model = None
-        self.kms = None
-        self.ort_cosy_tokenizer = None
-        self.llm = None
-        self.autotokenizer = None
-        self.common_cosy_model = None
-        self.music_cosy_model = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         
     @classmethod
@@ -576,14 +578,14 @@ class StepAudioRun:
               custom_mark="",
               unload_model=False,
               ):
-                
-        if self.funasr_model is None:
-            self.funasr_model, self.kms, self.ort_cosy_tokenizer, self.llm, self.autotokenizer, self.common_cosy_model, self.music_cosy_model = load_models(self.device)
+        global FUNASR_MODEL, KMS, ORT_COSY_TOKENIZER, LLM, AUTOTOKENIZER, COMMON_COSY_MODEL, MUSIC_COSY_MODEL
+        if FUNASR_MODEL is None:
+            FUNASR_MODEL, KMS, ORT_COSY_TOKENIZER, LLM, AUTOTOKENIZER, COMMON_COSY_MODEL, MUSIC_COSY_MODEL = load_models(self.device)
 
         encoder = StepAudioTokenizer(
-            self.funasr_model,
-            self.kms,
-            self.ort_cosy_tokenizer,
+            FUNASR_MODEL,
+            KMS,
+            ORT_COSY_TOKENIZER,
             self.device,
         )
         custom_mark = custom_mark.strip() if custom_mark.strip() else None
@@ -596,14 +598,14 @@ class StepAudioRun:
             marks = gen_tags(emotion, language, speed, custom_mark)
 
         if "(RAP)" in marks or "(哼唱)" in marks:
-            cosy_model = self.music_cosy_model
+            cosy_model = MUSIC_COSY_MODEL
         else:
-            cosy_model = self.common_cosy_model
+            cosy_model = COMMON_COSY_MODEL
 
         tts_engine = StepAudioTTS(
             encoder,
-            self.llm,
-            self.autotokenizer,
+            LLM,
+            AUTOTOKENIZER,
             cosy_model,
             self.device,
         )
@@ -625,13 +627,13 @@ class StepAudioRun:
         if unload_model:
             tts_engine.cleanup()
             encoder.cleanup()
-            self.funasr_model = None
-            self.kms = None
-            self.ort_cosy_tokenizer = None
-            self.llm = None
-            self.autotokenizer = None
-            self.common_cosy_model = None
-            self.music_cosy_model = None
+            FUNASR_MODEL = None
+            KMS = None
+            ORT_COSY_TOKENIZER = None
+            LLM = None
+            AUTOTOKENIZER = None
+            COMMON_COSY_MODEL = None
+            MUSIC_COSY_MODEL = None
             del cosy_model
             gc.collect()
             torch.cuda.empty_cache()
@@ -641,13 +643,6 @@ class StepAudioRun:
 
 class StepAudioClone:
     def __init__(self):
-        self.funasr_model = None
-        self.kms = None
-        self.ort_cosy_tokenizer = None
-        self.llm = None
-        self.autotokenizer = None
-        self.common_cosy_model = None
-        self.music_cosy_model = None
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
     @classmethod
@@ -690,14 +685,14 @@ class StepAudioClone:
               custom_mark="",
               unload_model=False,
               ):
-                
-        if self.funasr_model is None:
-            self.funasr_model, self.kms, self.ort_cosy_tokenizer, self.llm, self.autotokenizer, self.common_cosy_model, self.music_cosy_model = load_models(self.device)
+        global FUNASR_MODEL, KMS, ORT_COSY_TOKENIZER, LLM, AUTOTOKENIZER, COMMON_COSY_MODEL, MUSIC_COSY_MODEL   
+        if FUNASR_MODEL is None:
+            FUNASR_MODEL, KMS, ORT_COSY_TOKENIZER, LLM, AUTOTOKENIZER, COMMON_COSY_MODEL, MUSIC_COSY_MODEL = load_models(self.device)
         
         encoder = StepAudioTokenizer(
-            self.funasr_model,
-            self.kms,
-            self.ort_cosy_tokenizer,
+            FUNASR_MODEL,
+            KMS,
+            ORT_COSY_TOKENIZER,
             self.device,
         )
         
@@ -711,14 +706,14 @@ class StepAudioClone:
             marks = gen_tags(emotion, language, speed, custom_mark)
 
         if "(RAP)" in marks or "(哼唱)" in marks:
-            cosy_model = self.music_cosy_model
+            cosy_model = MUSIC_COSY_MODEL
         else:
-            cosy_model = self.common_cosy_model
+            cosy_model = COMMON_COSY_MODEL
 
         tts_engine = StepAudioTTS(
             encoder,
-            self.llm,
-            self.autotokenizer,
+            LLM,
+            AUTOTOKENIZER,
             cosy_model,
             self.device,
         )
@@ -741,13 +736,13 @@ class StepAudioClone:
         if unload_model:
             tts_engine.cleanup()
             encoder.cleanup()
-            self.funasr_model = None
-            self.kms = None
-            self.ort_cosy_tokenizer = None
-            self.llm = None
-            self.autotokenizer = None
-            self.common_cosy_model = None
-            self.music_cosy_model = None
+            FUNASR_MODEL = None
+            KMS = None
+            ORT_COSY_TOKENIZER = None
+            LLM = None
+            AUTOTOKENIZER = None
+            COMMON_COSY_MODEL = None
+            MUSIC_COSY_MODEL = None
             del cosy_model
             gc.collect()
             torch.cuda.empty_cache()
